@@ -67,14 +67,17 @@ export default function SignInScreen() {
             </Text>
 
             <ArrowRight size={18} color="#5f6e66" />
-          </Pressable>{" "}
-          <Pressable
-            className={`mb-3 h-14 flex-row items-center rounded-2xl border border-foreground bg-foreground px-4 active:opacity-90 ${
+          </Pressable>
+          {/* <Pressable>
+            className=
+            {`mb-3 h-14 flex-row items-center rounded-2xl border border-foreground bg-foreground px-4 active:opacity-90 ${
               isLoading ? "opacity-70" : ""
             }`}
             disabled={isLoading}
-            onPress={() => handleSocialAuth("oauth_apple")}
-          >
+            onPress={async () => {
+              await handleSocialAuth("oauth_apple");
+            }}
+          
             <View className="h-8 w-8 items-center justify-center rounded-full ">
               <AppleIcon size={20} />
             </View>
@@ -82,7 +85,7 @@ export default function SignInScreen() {
               {isAppleLoading ? "Connecting Apple..." : "Continue with Apple"}
             </Text>
             <ArrowRight size={18} color="#5f6e66" />
-          </Pressable>
+          </Pressable> */}
         </View>
       </View>
     </SafeAreaView>

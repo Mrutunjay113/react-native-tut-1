@@ -12,7 +12,6 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   return (
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      {" "}
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Stack screenOptions={{ headerShown: false }} />
       </ThemeProvider>

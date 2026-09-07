@@ -54,12 +54,12 @@ export default function MainScreen() {
       }}
     >
       {isSignedIn ? (
-        <Text>
-          You're signed in
+        <>
+          <Text>You're signed in</Text>
           <Pressable onPress={handleSignOut}>
             <Text>Sign out</Text>
           </Pressable>
-        </Text>
+        </>
       ) : (
         <Text>You're not signed in</Text>
       )}
