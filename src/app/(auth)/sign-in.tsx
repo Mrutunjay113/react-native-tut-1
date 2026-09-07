@@ -1,235 +1,90 @@
-import { useSignIn } from "@clerk/expo";
-import { type Href, Link, useRouter } from "expo-router";
-import { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import useSocialAuth from "@/hooks/useSocialAuth";
+import { Image } from "expo-image";
+import { AppleIcon, ArrowRight } from "lucide-react-native";
+import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignInScreen() {
-  const { signIn, errors, fetchStatus } = useSignIn();
-  const router = useRouter();
+  const { handleSocialAuth, loadingStrategy } = useSocialAuth();
 
-  const [emailAddress, setEmailAddress] = useState("");
-  const [password, setPassword] = useState("");
-  const [code, setCode] = useState("");
-
-  const navigateAfterAuth = ({
-    session,
-    decorateUrl,
-  }: {
-    session?: { currentTask?: unknown } | null;
-    decorateUrl: (path: string) => string;
-  }) => {
-    if (session?.currentTask) {
-      return;
-    }
-
-    const url = decorateUrl("/");
-    if (url.startsWith("http")) {
-      window.location.href = url;
-    } else {
-      router.replace(url as Href);
-    }
-  };
-
-  const handleSubmit = async () => {
-    const { error } = await signIn.password({
-      emailAddress,
-      password,
-    });
-    if (error) {
-      return;
-    }
-
-    if (signIn.status === "complete") {
-      await signIn.finalize({ navigate: navigateAfterAuth });
-    } else if (signIn.status === "needs_second_factor") {
-      // MFA is enabled. See Clerk's multi-factor custom flow guide.
-    } else if (signIn.status === "needs_client_trust") {
-      const emailCodeFactor = signIn.supportedSecondFactors?.find(
-        (factor) => factor.strategy === "email_code",
-      );
-
-      if (emailCodeFactor) {
-        await signIn.mfa.sendEmailCode();
-      }
-    }
-  };
-
-  const handleVerify = async () => {
-    const { error } = await signIn.mfa.verifyEmailCode({ code });
-    if (error) {
-      return;
-    }
-
-    if (signIn.status === "complete") {
-      await signIn.finalize({ navigate: navigateAfterAuth });
-    }
-  };
-
-  if (signIn.status === "needs_client_trust") {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Text style={styles.title}>Verify your account</Text>
-        <TextInput
-          style={styles.input}
-          value={code}
-          placeholder="Enter your verification code"
-          placeholderTextColor="#666666"
-          onChangeText={setCode}
-          keyboardType="numeric"
-        />
-        {errors.fields.code ? (
-          <Text style={styles.error}>{errors.fields.code.message}</Text>
-        ) : null}
-        <Pressable
-          style={({ pressed }) => [
-            styles.button,
-            fetchStatus === "fetching" && styles.buttonDisabled,
-            pressed && styles.buttonPressed,
-          ]}
-          onPress={handleVerify}
-          disabled={fetchStatus === "fetching"}
-        >
-          <Text style={styles.buttonText}>Verify</Text>
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [
-            styles.secondaryButton,
-            pressed && styles.buttonPressed,
-          ]}
-          onPress={() => signIn.mfa.sendEmailCode()}
-        >
-          <Text style={styles.secondaryButtonText}>I need a new code</Text>
-        </Pressable>
-        <Pressable
-          style={({ pressed }) => [
-            styles.secondaryButton,
-            pressed && styles.buttonPressed,
-          ]}
-          onPress={() => signIn.reset()}
-        >
-          <Text style={styles.secondaryButtonText}>Start over</Text>
-        </Pressable>
-      </SafeAreaView>
-    );
-  }
+  const isGoogleLoading = loadingStrategy === "oauth_google";
+  const isAppleLoading = loadingStrategy === "oauth_apple";
+  const isLoading = isGoogleLoading || isAppleLoading;
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Sign in</Text>
+    <SafeAreaView
+      className="flex-1 bg-primary dark:bg-secondary"
+      edges={["top"]}
+    >
+      <View className="absolute -left-16 top-12 h-56 w-56 rounded-full bg-primary/80 dark:bg-background/40" />
+      <View className="absolute right-[-74px] top-40 h-72 w-72 rounded-full bg-primary/70 dark:bg-background/35" />
+      <View className="px-6 pt-4">
+        <Text className="text-center dark:text-foreground text-5xl font-extrabold tracking-tight text-primary-foreground uppercase font-mono">
+          Grocify
+        </Text>
+        <Text className="mt-1 text-center text-[14px] text-primary-foreground/80 dark:text-foreground/75">
+          Plan smarter. Shop happier.
+        </Text>
+        <View className="mt-6 rounded-[30px] border border-white/20 bg-white/10 p-3">
+          <Image
+            source={require("@/assets/images/auth.png")}
+            style={{ width: "100%", height: 300 }}
+            contentFit="contain"
+          />
+        </View>
+      </View>
+      <View className="mt-8 rounded-t-[36px] bg-card px-6 pb-8 pt-6">
+        <View className="self-center rounded-full bg-secondary px-3 py-1">
+          <Text className="text-xs font-semibold uppercase tracking-[1px] text-secondary-foreground">
+            Welcome Back
+          </Text>
+        </View>
+        <View className="mt-2">
+          <Text className="mt-2 text-center text-sm leading-6 text-muted-foreground">
+            Choose a social provider and jump right into your personalized
+            grocery experience.
+          </Text>
+        </View>
+        <View className="mt-6">
+          <Pressable
+            className={`mb-3 h-14 flex-row items-center rounded-2xl border border-border bg-card px-4 active:opacity-90 ${
+              isLoading ? "opacity-70" : ""
+            }`}
+            disabled={isLoading}
+            onPress={() => handleSocialAuth("oauth_google")}
+          >
+            <View className="h-8 w-8 items-center justify-center rounded-full ">
+              <Image
+                source={require("@/assets/images/google.png")}
+                style={{ width: 20, height: 20 }}
+              />
+            </View>
 
-      <Text style={styles.label}>Email address</Text>
-      <TextInput
-        style={styles.input}
-        autoCapitalize="none"
-        value={emailAddress}
-        placeholder="Enter email"
-        placeholderTextColor="#666666"
-        onChangeText={setEmailAddress}
-        keyboardType="email-address"
-      />
-      {errors.fields.identifier ? (
-        <Text style={styles.error}>{errors.fields.identifier.message}</Text>
-      ) : null}
+            <Text className="ml-3 flex-1 text-lg font-semibold text-card-foreground">
+              {isGoogleLoading
+                ? "Connecting Google..."
+                : "Continue with Google"}
+            </Text>
 
-      <Text style={styles.label}>Password</Text>
-      <TextInput
-        style={styles.input}
-        value={password}
-        placeholder="Enter password"
-        placeholderTextColor="#666666"
-        secureTextEntry
-        onChangeText={setPassword}
-      />
-      {errors.fields.password ? (
-        <Text style={styles.error}>{errors.fields.password.message}</Text>
-      ) : null}
-
-      <Pressable
-        style={styles.button}
-        onPress={handleSubmit}
-        disabled={!emailAddress || !password || fetchStatus === "fetching"}
-      >
-        <Text style={styles.buttonText}>Continue</Text>
-      </Pressable>
-
-      <View style={styles.linkContainer}>
-        <Text>Don't have an account? </Text>
-        <Link href="/(auth)/sign-up">
-          <Text style={styles.link}>Sign up</Text>
-        </Link>
+            <ArrowRight size={18} color="#5f6e66" />
+          </Pressable>{" "}
+          <Pressable
+            className={`mb-3 h-14 flex-row items-center rounded-2xl border border-foreground bg-foreground px-4 active:opacity-90 ${
+              isLoading ? "opacity-70" : ""
+            }`}
+            disabled={isLoading}
+            onPress={() => handleSocialAuth("oauth_apple")}
+          >
+            <View className="h-8 w-8 items-center justify-center rounded-full ">
+              <AppleIcon size={20} />
+            </View>
+            <Text className="ml-3 flex-1 text-lg font-semibold text-background">
+              {isAppleLoading ? "Connecting Apple..." : "Continue with Apple"}
+            </Text>
+            <ArrowRight size={18} color="#5f6e66" />
+          </Pressable>
+        </View>
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    gap: 12,
-    justifyContent: "flex-start",
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "700",
-    marginBottom: 8,
-  },
-  label: {
-    fontWeight: "600",
-    fontSize: 14,
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    backgroundColor: "#fff",
-  },
-  button: {
-    backgroundColor: "#000",
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    alignItems: "center",
-
-    marginTop: 8,
-  },
-  buttonPressed: {
-    opacity: 0.7,
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "600",
-  },
-  secondaryButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  secondaryButtonText: {
-    color: "#0a7ea4",
-    fontWeight: "600",
-  },
-  linkContainer: {
-    flexDirection: "row",
-    gap: 4,
-    marginTop: 12,
-    alignItems: "center",
-  },
-  link: {
-    color: "#0a7ea4",
-    fontWeight: "600",
-  },
-  error: {
-    color: "#d32f2f",
-    fontSize: 12,
-    marginTop: -8,
-  },
-});

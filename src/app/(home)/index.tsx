@@ -1,13 +1,7 @@
 import { useAuth, useClerk } from "@clerk/expo";
+
 import { router } from "expo-router";
-import {
-  ActivityIndicator,
-  Button,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
 
 export default function MainScreen() {
   const { isLoaded, isSignedIn } = useAuth();
@@ -17,7 +11,7 @@ export default function MainScreen() {
   const handleSignUp = async () => {
     try {
       //   await startHostedAuth({ mode: "sign-up" });
-      router.replace("/(auth)/sign-up");
+      router.replace("/sign-in");
     } catch (error) {
       // Handle the error in your app.
     }
@@ -37,33 +31,47 @@ export default function MainScreen() {
 
   if (!isLoaded) {
     return (
-      <View style={styles.container}>
+      <View
+        style={{
+          flex: 1,
+          gap: 12,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <ActivityIndicator size="large" />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View
+      style={{
+        flex: 1,
+        gap: 12,
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       {isSignedIn ? (
-        <>
-          <Text>You're signed in</Text>
+        <Text>
+          You're signed in
           <Pressable onPress={handleSignOut}>
             <Text>Sign out</Text>
           </Pressable>
-        </>
+        </Text>
       ) : (
-        <Button title="Sign up" onPress={handleSignUp} />
+        <Text>You're not signed in</Text>
       )}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    gap: 12,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     gap: 12,
+//     alignItems: "center",
+//     justifyContent: "center",
+//   },
+// });
