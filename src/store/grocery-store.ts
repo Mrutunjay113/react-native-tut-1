@@ -9,12 +9,12 @@ export enum GroceryCategory {
 }
 
 export enum GroceryPriority {
-  Low = "Low",
-  Medium = "Medium",
-  High = "High",
+  low = "low",
+  medium = "medium",
+  high = "high",
 }
 
-interface GroceryItem {
+export interface GroceryItem {
   id: string;
   name: string;
   quantity: number;
