@@ -38,7 +38,15 @@
       "@clerk/expo",
       "expo-secure-store",
       "expo-web-browser",
-      "./plugins/with-android-local-properties"
+      "./plugins/with-android-local-properties",
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "grocify",
+          "organization": "test-0ye"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
