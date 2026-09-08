@@ -1,8 +1,91 @@
+import PlannerFormCard from "@/components/planner/PlannerFormCard";
+import PlannerHeroImage from "@/components/planner/PlannerHeroImage";
+import TabScreenBackground from "@/components/TabScreenBackground";
+import { useGroceryStore } from "@/store/grocery-store";
+import { Edit } from "lucide-react-native";
 import { Text, View } from "react-native";
-export default function PlannerScreen() {
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+
+const planner = () => {
+  const { items } = useGroceryStore();
+  const pendingItemsCount = items.filter((item) => !item.purchased).length;
+  const highPriorityItemsCount = items.filter(
+    (item) => item.priority === "high",
+  ).length;
+
+  const totalQuantity = items
+    .filter((item) => !item.purchased)
+    .reduce((acc, item) => acc + item.quantity, 0);
+
   return (
-    <View>
-      <Text>Planner</Text>
-    </View>
+    <KeyboardAwareScrollView
+      bottomOffset={80}
+      keyboardShouldPersistTaps="handled"
+      className="flex-1 bg-background"
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={{ padding: 20, gap: 14 }}
+    >
+      <TabScreenBackground />
+      <View className="gap-4 rounded-3xl border border-border bg-card/70 p-5">
+        <View className="flex-row items-start justify-between">
+          <View className="flex-1 pr-4">
+            <Text className="text-xs font-semibold uppercase tracking-[1.2px] text-muted-foreground">
+              Grocery planner
+            </Text>
+            <Text className="mt-1 text-3xl font-bold leading-9 text-foreground">
+              Plan smarter, shop calmer.
+            </Text>
+            <Text className="mt-2 text-sm leading-5 text-muted-foreground">
+              Organize your next grocery run with categories, quantities, and
+              priority in one place.
+            </Text>
+          </View>
+
+          <View className="h-12 w-12 items-center justify-center rounded-2xl bg-primary">
+            <Edit size={18} color="#ffffff" />
+          </View>
+        </View>
+        <View className="flex-row gap-2">
+          <View className="flex-1 rounded-2xl border border-border bg-background/80 p-3">
+            <Text className="text-xs font-medium uppercase tracking-[1px] text-muted-foreground">
+              Pending
+            </Text>
+            <Text className="mt-1 text-xl font-bold text-foreground">
+              {pendingItemsCount}
+            </Text>
+          </View>
+
+          <View className="flex-1 rounded-2xl border border-border bg-background/80 p-3">
+            <Text className="text-xs font-medium uppercase tracking-[1px] text-muted-foreground">
+              High Priority
+            </Text>
+            <Text className="mt-1 text-xl font-bold text-foreground">
+              {highPriorityItemsCount}
+            </Text>
+          </View>
+
+          <View className="flex-1 rounded-2xl border border-border bg-background/80 p-3">
+            <Text className="text-xs font-medium uppercase tracking-[1px] text-muted-foreground">
+              Units
+            </Text>
+            <Text className="mt-1 text-xl font-bold text-foreground">
+              {totalQuantity}
+            </Text>
+          </View>
+        </View>
+      </View>{" "}
+      <PlannerHeroImage />
+      <View className="px-1">
+        <Text className="text-sm font-semibold uppercase tracking-[1px] text-muted-foreground">
+          Build your list
+        </Text>
+        <Text className="mt-1 text-sm text-muted-foreground">
+          Add items with the right quantity, category, and urgency.
+        </Text>
+      </View>
+      <PlannerFormCard />
+    </KeyboardAwareScrollView>
   );
-}
+};
+
+export default planner;
